@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tap to Zoom Image Gallery</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Tap to Zoom</h1>
+  <p class="instructions">Single tap to zoom in/out. Drag to pan when zoomed.</p>
+  
+  <div class="image-container">
+    <div class="image-wrapper">
+      <img 
+        src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200" 
+        alt="Mountain landscape"
+        class="zoomable-image"
+        id="zoomImage"
+      >
+    </div>
+    <div class="zoom-indicator" id="zoomIndicator">Tap to zoom</div>
+    <div class="zoom-level" id="zoomLevel">1x</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
