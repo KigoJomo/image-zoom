@@ -1,28 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tap to Zoom Image Gallery</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Single Tap Zoom Demo with Hotspots</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Tap to Zoom</h1>
-  <p class="instructions">Single tap to zoom in/out. Drag to pan when zoomed.</p>
-  
-  <div class="image-container">
-    <div class="image-wrapper">
-      <img 
-        src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200" 
-        alt="Mountain landscape"
-        class="zoomable-image"
-        id="zoomImage"
-      >
-    </div>
-    <div class="zoom-indicator" id="zoomIndicator">Tap to zoom</div>
-    <div class="zoom-level" id="zoomLevel">1x</div>
-  </div>
 
-  <script src="script.js"></script>
+    <div class="container" id="zoomContainer">
+        <div class="zoom-content" id="zoomContent">
+            <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1200&auto=format&fit=crop" 
+                 alt="Nature landscape" 
+                 class="zoom-image">
+            
+            <!-- Hotspots -->
+            <button class="hotspot" style="top: 35%; left: 25%;" data-target="overlay-mountain" aria-label="View Mountain Details"></button>
+            <button class="hotspot" style="top: 65%; left: 60%;" data-target="overlay-lake" aria-label="View Lake Details"></button>
+            <button class="hotspot" style="top: 80%; left: 30%;" data-target="overlay-forest" aria-label="View Forest Details"></button>
+        </div>
+
+        <!-- Detail Overlays -->
+        <div class="detail-overlay" id="overlay-mountain">
+            <h3>Mountain Range</h3>
+            <p>The distant peaks catch the morning light, creating a stunning contrast with the valley.</p>
+        </div>
+        <div class="detail-overlay" id="overlay-lake">
+            <h3>Alpine Lake</h3>
+            <p>Crystal clear waters reflecting the sky and surrounding wilderness.</p>
+        </div>
+        <div class="detail-overlay" id="overlay-forest">
+            <h3>Dense Forest</h3>
+            <p>Ancient evergreens provide shelter for local wildlife and maintain the ecosystem.</p>
+        </div>
+
+        <div class="instructions">Tap image or hotspot to zoom</div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

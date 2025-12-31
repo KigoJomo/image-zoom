@@ -1,148 +1,100 @@
-const image = document.getElementById('zoomImage');
-const indicator = document.getElementById('zoomIndicator');
-const zoomLevelDisplay = document.getElementById('zoomLevel');
-const container = image.parentElement;
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('zoomContainer');
+    const zoomContent = document.getElementById('zoomContent');
+    const hotspots = document.querySelectorAll('.hotspot');
+    let currentOverlayId = null;
 
-let isZoomed = false;
-let scale = 1;
-const maxScale = 3;
+    if (!container || !zoomContent) return;
 
-// Pan state
-let isPanning = false;
-let startX = 0;
-let startY = 0;
-let translateX = 0;
-let translateY = 0;
-let currentTranslateX = 0;
-let currentTranslateY = 0;
+    function resetZoom() {
+        zoomContent.classList.remove('zoomed');
+        container.classList.remove('active');
+        
+        // Hide any active overlay
+        if (currentOverlayId) {
+            document.getElementById(currentOverlayId)?.classList.remove('visible');
+            currentOverlayId = null;
+        }
+    }
 
-// Track if user is dragging vs tapping
-let isDragging = false;
-const dragThreshold = 5;
-let initialPointerX = 0;
-let initialPointerY = 0;
+    // Handle clicks on the container (for general zooming or unzooming)
+    container.addEventListener('click', function(e) {
+        // If clicking a hotspot, don't trigger this generic handler immediately
+        // (Hotspot logic is handled in its own listener below)
+        if (e.target.closest('.hotspot')) return;
 
-function updateTransform() {
-  image.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-}
+        const isZoomed = zoomContent.classList.contains('zoomed');
 
-function clampTranslation() {
-  if (scale <= 1) {
-    translateX = 0;
-    translateY = 0;
-    return;
-  }
+        if (!isZoomed) {
+            // General zoom (same as before)
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-  const rect = container.getBoundingClientRect();
-  const imageWidth = rect.width * scale;
-  const imageHeight = rect.height * scale;
+            zoomContent.style.transformOrigin = `${x}px ${y}px`;
+            zoomContent.classList.add('zoomed');
+            container.classList.add('active');
+        } else {
+            // Unzoom
+            resetZoom();
+        }
+    });
 
-  // Calculate max translation (accounting for scale in translate)
-  const maxTranslateX = (imageWidth - rect.width) / (2 * scale);
-  const maxTranslateY = (imageHeight - rect.height) / (2 * scale);
+    // Handle hotspot clicks
+    hotspots.forEach(hotspot => {
+        hotspot.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent container click event
 
-  translateX = Math.max(-maxTranslateX, Math.min(maxTranslateX, translateX));
-  translateY = Math.max(-maxTranslateY, Math.min(maxTranslateY, translateY));
-}
+            const isZoomed = zoomContent.classList.contains('zoomed');
+            const targetId = this.getAttribute('data-target');
 
-function toggleZoom(e) {
-  if (isDragging) return;
+            if (!isZoomed) {
+                // 1. Zoom into the hotspot
+                // We need the hotspot's position relative to the container *before* zoom
+                // But since hotspots are absolutely positioned percentages, we can calculate
+                // the origin based on those percentages or the current element position.
+                
+                // Let's use the element's center position relative to the container
+                const rect = container.getBoundingClientRect();
+                const hotRect = this.getBoundingClientRect();
+                
+                const x = (hotRect.left + hotRect.width / 2) - rect.left;
+                const y = (hotRect.top + hotRect.height / 2) - rect.top;
 
-  if (!isZoomed) {
-    // Zoom in to tap location
-    const rect = container.getBoundingClientRect();
-    const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
-    const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+                zoomContent.style.transformOrigin = `${x}px ${y}px`;
+                zoomContent.classList.add('zoomed');
+                container.classList.add('active');
 
-    // Calculate offset from center
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
+                // 2. Show Overlay
+                if (targetId) {
+                    const overlay = document.getElementById(targetId);
+                    if (overlay) {
+                        overlay.classList.add('visible');
+                        currentOverlayId = targetId;
+                    }
+                }
+            } else {
+                // If already zoomed, clicking a hotspot (maybe a different one?) 
+                // could either switch focus or zoom out. 
+                // Let's implement: Click current hotspot -> Zoom Out. Click other -> Switch.
+                
+                // For simplicity in this "single tap" model, clicking a hotspot while zoomed
+                // acts the same as clicking elsewhere if we want a simple toggle.
+                // OR, we can make it switch to that hotspot. Let's try switching focus.
+                
+                // Hide old overlay
+                if (currentOverlayId) {
+                    document.getElementById(currentOverlayId)?.classList.remove('visible');
+                }
 
-    scale = maxScale;
-
-    // Translate to center the tap point
-    translateX = (centerX - x) / scale;
-    translateY = (centerY - y) / scale;
-
-    clampTranslation();
-    isZoomed = true;
-    image.classList.add('zoomed');
-    indicator.textContent = 'Tap to reset';
-  } else {
-    // Zoom out
-    scale = 1;
-    translateX = 0;
-    translateY = 0;
-    isZoomed = false;
-    image.classList.remove('zoomed');
-    indicator.textContent = 'Tap to zoom';
-  }
-
-  zoomLevelDisplay.textContent = `${scale}x`;
-  updateTransform();
-}
-
-// Pointer events for unified mouse/touch handling
-function onPointerDown(e) {
-  if (!isZoomed) return;
-
-  e.preventDefault();
-  isPanning = true;
-  isDragging = false;
-
-  const clientX = e.clientX || e.touches?.[0]?.clientX;
-  const clientY = e.clientY || e.touches?.[0]?.clientY;
-
-  initialPointerX = clientX;
-  initialPointerY = clientY;
-  startX = clientX;
-  startY = clientY;
-  currentTranslateX = translateX;
-  currentTranslateY = translateY;
-}
-
-function onPointerMove(e) {
-  if (!isPanning) return;
-
-  e.preventDefault();
-
-  const clientX = e.clientX || e.touches?.[0]?.clientX;
-  const clientY = e.clientY || e.touches?.[0]?.clientY;
-
-  const deltaX = clientX - initialPointerX;
-  const deltaY = clientY - initialPointerY;
-
-  // Check if we've moved enough to be considered a drag
-  if (Math.abs(deltaX) > dragThreshold || Math.abs(deltaY) > dragThreshold) {
-    isDragging = true;
-  }
-
-  const dx = clientX - startX;
-  const dy = clientY - startY;
-
-  translateX = currentTranslateX + dx / scale;
-  translateY = currentTranslateY + dy / scale;
-
-  clampTranslation();
-  updateTransform();
-}
-
-function onPointerUp() {
-  isPanning = false;
-}
-
-// Mouse events
-image.addEventListener('mousedown', onPointerDown);
-window.addEventListener('mousemove', onPointerMove);
-window.addEventListener('mouseup', onPointerUp);
-
-// Touch events
-image.addEventListener('touchstart', onPointerDown, { passive: false });
-window.addEventListener('touchmove', onPointerMove, { passive: false });
-window.addEventListener('touchend', onPointerUp);
-
-// Click/tap to toggle zoom
-image.addEventListener('click', toggleZoom);
-
-// Prevent context menu on long press
-image.addEventListener('contextmenu', (e) => e.preventDefault());
+                // Recalculate zoom origin for new target (tricky with CSS transform, 
+                // usually requires removing transition, resetting, then re-adding).
+                // Simplest UX: Zoom out first, then user taps again?
+                // Or just swap overlay if we assume the view is roughly okay?
+                
+                // Let's just treat it as a toggle-off for the demo to keep "single tap" consistent.
+                resetZoom();
+            }
+        });
+    });
+});

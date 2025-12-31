@@ -1,0 +1,142 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    font-family: sans-serif;
+}
+
+.container {
+    position: relative;
+    width: 90vw;
+    max-width: 600px;
+    aspect-ratio: 4/3;
+    border: 4px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #000;
+    cursor: zoom-in;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.container.active {
+    cursor: zoom-out;
+}
+
+/* Wrapper for Image and Hotspots to zoom them together */
+.zoom-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform-origin: center center;
+}
+
+.zoom-content.zoomed {
+    transform: scale(2.5);
+}
+
+.zoom-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    /* Removed transform transition from here as parent handles it now */
+}
+
+/* Hotspots */
+.hotspot {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 69, 0, 0.8);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%); /* Center on the coordinate */
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    z-index: 10;
+    transition: transform 0.2s, background-color 0.2s;
+    /* Ensure hotspots don't scale up hugely when parent zooms - counter-scale? 
+       Actually, standard mobile behavior is they stay relative to the image map. 
+       If we want them to stay distinct, we let them scale, or we counter-scale in JS.
+       For this demo, letting them scale with the map is more "natural" for a "zoom" 
+       but might make them huge. Let's try simple scaling first. */
+}
+
+.hotspot:hover {
+    background: rgba(255, 69, 0, 1);
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* Pulse animation for hotspots */
+.hotspot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 69, 0, 0.6);
+    transform: translate(-50%, -50%);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
+
+/* Overlays */
+.detail-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 20px;
+    transform: translateY(100%); /* Hidden off-screen */
+    transition: transform 0.4s ease-out;
+    z-index: 20;
+    border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.detail-overlay.visible {
+    transform: translateY(0);
+}
+
+.detail-overlay h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: #ff9f43;
+}
+
+.detail-overlay p {
+    margin: 0;
+    line-height: 1.4;
+    font-size: 0.95rem;
+}
+
+/* Instruction text */
+.instructions {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.3s;
+    z-index: 15;
+}
+
+.container.active .instructions {
+    opacity: 0;
+}
