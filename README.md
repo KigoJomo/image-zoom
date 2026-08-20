@@ -1,37 +1,24 @@
-# Single Tap Zoom Demo with Hotspots
+# Image Zoom
 
-A lightweight, vanilla JavaScript demonstration of a "single tap to zoom" interaction pattern, commonly found in mobile galleries but adapted for web interactions with added contextual hotspots.
+A dependency-free image viewer with single-tap zooming and fixed hotspots.
 
-## Features
+Clicking the image zooms toward the point you clicked. Clicking a hotspot zooms to its location and opens a short detail card. A second click returns to the full image.
 
-*   **Single Tap Interaction:** Zoom in or out with a simple click/tap instead of the traditional double-tap.
-*   **Smart Zoom Origin:** The zoom animation centers exactly on the point where the user tapped.
-*   **Interactive Hotspots:** Pulsing indicators on the image that, when tapped, zoom directly to that location and reveal context-aware details.
-*   **Constrained Viewport:** The image is contained within a fixed box with no overflow, maintaining a clean UI layout.
-*   **Zero Dependencies:** Built entirely with native HTML, CSS, and JavaScript.
+## Run it
 
-## Project Structure
+Open `index.html` in a browser. There is no install or build step.
 
-```
-├── index.html    # Main structure and content
-├── style.css     # Styling, animations, and transitions
-├── script.js     # Logic for zoom calculations and event handling
-└── README.md     # Project documentation
+```bash
+python -m http.server 8000
 ```
 
-## How to Run
+Then open `http://localhost:8000`.
 
-1.  Clone this repository.
-2.  Open `index.html` in any modern web browser.
+## Adapt it
 
-## Usage
+- Change the image `src` in `index.html`.
+- Position hotspots with percentage-based `top` and `left` values.
+- Edit the associated labels and descriptions in the same file.
+- Change the scale in `.zoom-content.zoomed` inside `style.css`.
 
-*   **To Zoom:** Click anywhere on the image or tap a specific orange hotspot.
-*   **To Unzoom:** Click anywhere on the zoomed image.
-*   **Hotspots:** Tapping a hotspot will zoom specifically to that feature and slide up an information card about it.
-
-## Customization
-
-*   **Image:** Change the `src` attribute in `index.html` to use your own image.
-*   **Hotspot Positions:** Adjust the `top` and `left` percentage values in `index.html` (e.g., `style="top: 35%; left: 25%;"`) to reposition hotspots for your specific image.
-*   **Zoom Level:** Modify `.zoom-content.zoomed { transform: scale(2.5); }` in `style.css` to change the magnification factor.
+The demo uses plain HTML, CSS, and JavaScript. Hotspot coordinates are hand-authored, and the current version does not include keyboard navigation or pinch-to-zoom.
